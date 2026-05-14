@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GROOVE — Vinyl Record Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0e0d0b;
+      --cream: #f5f0e8;
+      --red:   #d4321c;
+      --gold:  #c9a84c;
+      --gray:  #2a2820;
+      --muted: #7a7568;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--black);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--black);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px;
+      height: 60px;
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      color: var(--cream);
+      letter-spacing: 0.1em;
+    }
+    .nav-logo span { color: var(--red); }
+    .nav-links {
+      display: flex; gap: 32px; list-style: none;
+    }
+    .nav-links a {
+      font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #888; text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-cart {
+      font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--gold); cursor: pointer;
+      background: none; border: 1px solid var(--gold);
+      padding: 8px 20px; border-radius: 4px;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .nav-cart:hover { background: var(--gold); color: var(--black); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: var(--black);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 60px;
+    }
+    .hero-left {
+      padding: 80px 48px 80px 64px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .hero-tag {
+      font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--red); margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hero-tag::before {
+      content: ''; display: block;
+      width: 32px; height: 1px; background: var(--red);
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 8vw, 120px);
+      line-height: 0.9;
+      color: var(--cream);
+      letter-spacing: 0.02em;
+      margin-bottom: 32px;
+    }
+    .hero-title em { color: var(--gold); font-style: normal; }
+    .hero-sub {
+      font-size: 15px; color: #777; line-height: 1.7;
+      max-width: 380px; margin-bottom: 48px;
+      font-weight: 300;
+    }
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--red); color: var(--cream);
+      border: none; padding: 16px 36px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; border-radius: 4px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-ghost {
+      background: none; color: var(--cream);
+      border: 1px solid #333; padding: 16px 36px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; border-radius: 4px;
+      transition: border-color 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-ghost:hover { border-color: #666; }
+
+    .hero-right {
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    /* Vinyl SVG */
+    .vinyl-wrap {
+      position: relative; width: 380px; height: 380px;
+      animation: spin 18s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .vinyl-wrap:hover { animation-play-state: paused; }
+
+    .hero-stats {
+      position: absolute; bottom: 48px; left: 64px;
+      display: flex; gap: 48px;
+    }
+    .stat { }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px; color: var(--cream); letter-spacing: 0.05em;
+    }
+    .stat-label {
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      background: var(--red);
+      padding: 14px 0; overflow: hidden;
+    }
+    .marquee-inner {
+      display: flex; gap: 0;
+      animation: marquee 20s linear infinite;
+      white-space: nowrap;
+    }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee-item {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; letter-spacing: 0.15em; color: var(--cream);
+      padding: 0 32px;
+    }
+    .marquee-dot { color: rgba(255,255,255,0.4); }
+
+    /* ── SECTION ── */
+    section { padding: 96px 64px; }
+
+    .section-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; margin-bottom: 56px;
+    }
+    .section-label {
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--red); margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px; letter-spacing: 0.05em; line-height: 1;
+    }
+    .section-link {
+      font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      border-bottom: 1px solid currentColor; padding-bottom: 2px;
+      transition: color 0.2s;
+    }
+    .section-link:hover { color: var(--black); }
+
+    /* ── RECORDS GRID ── */
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 28px;
+    }
+
+    .record-card {
+      cursor: pointer;
+      transition: transform 0.25s;
+    }
+    .record-card:hover { transform: translateY(-6px); }
+    .record-card:hover .record-cover::after { opacity: 1; }
+
+    .record-cover {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .record-cover::after {
+      content: 'Quick view';
+      position: absolute; inset: 0;
+      background: rgba(14,13,11,0.7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--cream); opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .cover-img {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .record-artist {
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 4px;
+    }
+    .record-title {
+      font-size: 16px; font-weight: 500; margin-bottom: 8px;
+    }
+    .record-foot {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .record-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 0.05em; color: var(--black);
+    }
+    .record-genre {
+      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--cream); background: var(--black);
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .add-btn {
+      width: 32px; height: 32px;
+      background: var(--red); border: none; border-radius: 50%;
+      color: var(--cream); font-size: 20px; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s, background 0.2s;
+    }
+    .add-btn:hover { transform: scale(1.15); background: #b82b16; }
+
+    /* ── FEATURED BAND ── */
+    .featured {
+      background: var(--black);
+      padding: 96px 64px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .feat-label {
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 16px;
+    }
+    .feat-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px; color: var(--cream);
+      letter-spacing: 0.03em; line-height: 0.95;
+      margin-bottom: 24px;
+    }
+    .feat-desc {
+      font-size: 15px; color: #888; line-height: 1.8;
+      font-weight: 300; margin-bottom: 36px;
+    }
+    .feat-vinyl {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%,
+        #1a1a1a 0%, #1a1a1a 12%,
+        #111 12%, #111 14%,
+        #222 14%, #222 100%
+      );
+      box-shadow: 0 0 0 2px #333, 0 32px 80px rgba(0,0,0,0.8);
+      animation: spin 12s linear infinite;
+      position: relative;
+    }
+    .feat-vinyl::after {
+      content: '';
+      position: absolute;
+      inset: 42%;
+      background: radial-gradient(circle, #c9a84c, #a07830);
+      border-radius: 50%;
+    }
+
+    /* ── GENRES ── */
+    .genres-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .genre-pill {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .genre-pill:hover {
+      background: var(--black);
+      border-color: var(--black);
+      color: var(--cream);
+      transform: translateY(-4px);
+    }
+    .genre-icon { font-size: 32px; margin-bottom: 12px; }
+    .genre-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px; letter-spacing: 0.08em;
+    }
+    .genre-count {
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-top: 4px;
+    }
+
+    /* ── NEWSLETTER ── */
+    .newsletter {
+      background: var(--gold);
+      padding: 80px 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 48px; flex-wrap: wrap;
+    }
+    .nl-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px; color: var(--black); letter-spacing: 0.04em;
+      line-height: 1;
+    }
+    .nl-sub {
+      font-size: 14px; color: rgba(0,0,0,0.6); margin-top: 8px; font-weight: 300;
+    }
+    .nl-form {
+      display: flex; gap: 0; flex: 1; max-width: 460px;
+    }
+    .nl-input {
+      flex: 1;
+      background: rgba(0,0,0,0.12);
+      border: 1px solid rgba(0,0,0,0.2);
+      border-right: none;
+      padding: 16px 20px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      color: var(--black); outline: none;
+      border-radius: 4px 0 0 4px;
+    }
+    .nl-input::placeholder { color: rgba(0,0,0,0.4); }
+    .nl-btn {
+      background: var(--black); color: var(--cream); border: none;
+      padding: 16px 28px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; border-radius: 0 4px 4px 0;
+      transition: opacity 0.2s;
+    }
+    .nl-btn:hover { opacity: 0.85; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      padding: 48px 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .foot-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; color: var(--cream); letter-spacing: 0.1em;
+    }
+    .foot-logo span { color: var(--red); }
+    .foot-copy {
+      font-size: 12px; color: #444; letter-spacing: 0.08em;
+    }
+    .foot-links { display: flex; gap: 24px; }
+    .foot-links a {
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #555; text-decoration: none; transition: color 0.2s;
+    }
+    .foot-links a:hover { color: var(--cream); }
+
+    /* ── CART TOAST ── */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--black); color: var(--cream);
+      padding: 16px 24px; border-radius: 8px;
+      font-size: 13px; letter-spacing: 0.05em;
+      border-left: 3px solid var(--red);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .hero-left { padding: 64px 24px; }
+      section { padding: 64px 24px; }
+      .featured { grid-template-columns: 1fr; padding: 64px 24px; }
+      .genres-grid { grid-template-columns: repeat(2,1fr); }
+      .newsletter { padding: 48px 24px; }
+      footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">GR<span>O</span>OVE</div>
+    <ul class="nav-links">
+      <li><a href="#catalog">Catalog</a></li>
+      <li><a href="#genres">Genres</a></li>
+      <li><a href="#featured">Artists</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button class="nav-cart" id="cartBtn">Cart (0)</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">New arrivals weekly</div>
+      <h1 class="hero-title">THE<br/>SOUND<br/>OF <em>NOW</em></h1>
+      <p class="hero-sub">Hand-picked vinyl records. New pressings, rare finds, and classic albums — shipped worldwide.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+        <a href="#featured" class="btn-ghost">Featured Artists</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="vinyl-wrap">
+        <svg viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="190" cy="190" r="188" fill="#111"/>
+          <circle cx="190" cy="190" r="186" fill="#1a1818"/>
+          <!-- grooves -->
+          <circle cx="190" cy="190" r="170" fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="160" fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="150" fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="140" fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="130" fill="none" stroke="#1f1f1f" stroke-width="0.8"/>
+          <circle cx="190" cy="190" r="120" fill="none" stroke="#1f1f1f" stroke-width="0.8"/>
+          <circle cx="190" cy="190" r="110" fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="100" fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="90"  fill="none" stroke="#222" stroke-width="0.6"/>
+          <circle cx="190" cy="190" r="80"  fill="none" stroke="#222" stroke-width="0.5"/>
+          <!-- label -->
+          <circle cx="190" cy="190" r="62" fill="#c9a84c"/>
+          <circle cx="190" cy="190" r="58" fill="#b8903e"/>
+          <text x="190" y="183" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="13" fill="#1c1c1c" letter-spacing="3">GROOVE</text>
+          <text x="190" y="198" text-anchor="middle" font-family="sans-serif" font-size="7" fill="rgba(0,0,0,0.5)" letter-spacing="2">RECORDS</text>
+          <text x="190" y="212" text-anchor="middle" font-family="'Courier New',monospace" font-size="8" fill="rgba(0,0,0,0.4)">STEREO · 33 1/3 RPM</text>
+          <!-- center hole -->
+          <circle cx="190" cy="190" r="5" fill="#1a1818"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">2400+</div>
+        <div class="stat-label">Records</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">48</div>
+        <div class="stat-label">Genres</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">12K</div>
+        <div class="stat-label">Customers</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      <span class="marquee-item">Jazz <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Blues <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Soul <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Rock <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Electronic <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Hip-Hop <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Classical <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Ambient <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Funk <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">New Arrivals <span class="marquee-dot">·</span></span>
+      <!-- duplicate for seamless loop -->
+      <span class="marquee-item">Jazz <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Blues <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Soul <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Rock <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Electronic <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Hip-Hop <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Classical <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Ambient <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">Funk <span class="marquee-dot">·</span></span>
+      <span class="marquee-item">New Arrivals <span class="marquee-dot">·</span></span>
+    </div>
+  </div>
+
+  <!-- CATALOG -->
+  <section id="catalog" style="background:#f9f6f0;">
+    <div class="section-header">
+      <div>
+        <div class="section-label">New in store</div>
+        <h2 class="section-title">Latest Arrivals</h2>
+      </div>
+      <a href="#" class="section-link">View all</a>
+    </div>
+
+    <div class="records-grid" id="recordsGrid"></div>
+  </section>
+
+  <!-- GENRES -->
+  <section id="genres">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Browse by sound</div>
+        <h2 class="section-title">Shop by Genre</h2>
+      </div>
+    </div>
+    <div class="genres-grid">
+      <div class="genre-pill"><div class="genre-icon">🎷</div><div class="genre-name">Jazz</div><div class="genre-count">340 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🎸</div><div class="genre-name">Rock</div><div class="genre-count">512 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🎹</div><div class="genre-name">Electronic</div><div class="genre-count">288 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🎺</div><div class="genre-name">Soul & Funk</div><div class="genre-count">196 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🎻</div><div class="genre-name">Classical</div><div class="genre-count">224 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🥁</div><div class="genre-name">Hip-Hop</div><div class="genre-count">178 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🌊</div><div class="genre-name">Ambient</div><div class="genre-count">134 records</div></div>
+      <div class="genre-pill"><div class="genre-icon">🎵</div><div class="genre-name">Blues</div><div class="genre-count">156 records</div></div>
+    </div>
+  </section>
+
+  <!-- FEATURED -->
+  <div class="featured" id="featured">
+    <div>
+      <div class="feat-label">Artist of the month</div>
+      <h2 class="feat-title">Miles<br/>Davis</h2>
+      <p class="feat-desc">A cornerstone of jazz history — from bebop to electric fusion, Davis reinvented the genre with each decade. Explore our curated collection of original pressings and anniversary editions.</p>
+      <button class="btn-primary">Explore Collection</button>
+    </div>
+    <div>
+      <div class="feat-vinyl"></div>
+    </div>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="newsletter">
+    <div>
+      <div class="nl-title">Stay in the Loop</div>
+      <div class="nl-sub">New drops, exclusive offers, and listening guides.</div>
+    </div>
+    <div class="nl-form">
+      <input class="nl-input" type="email" placeholder="your@email.com"/>
+      <button class="nl-btn" onclick="handleSubscribe()">Subscribe</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-logo">GR<span>O</span>OVE</div>
+    <div class="foot-copy">© 2025 Groove Records</div>
+    <div class="foot-links">
+      <a href="#">Instagram</a>
+      <a href="#">Shipping</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const RECORDS = [
+      { artist:'Miles Davis',     title:'Kind of Blue',        price:34,  genre:'Jazz',       color:'#1a2a3a', accent:'#4a7fa5' },
+      { artist:'Pink Floyd',      title:'The Dark Side of the Moon', price:42, genre:'Rock', color:'#0d0d1a', accent:'#8a6fc8' },
+      { artist:'Aphex Twin',      title:'Selected Ambient Works', price:38, genre:'Electronic',color:'#0d1a0d', accent:'#3a9a4a' },
+      { artist:'Nina Simone',     title:'I Put a Spell on You', price:29, genre:'Soul',       color:'#2a1a0d', accent:'#c87a2a' },
+      { artist:'John Coltrane',   title:'A Love Supreme',       price:36, genre:'Jazz',       color:'#1a0d0d', accent:'#c84a4a' },
+      { artist:'Daft Punk',       title:'Random Access Memories',price:44,genre:'Electronic', color:'#0d0d0d', accent:'#c9a84c' },
+      { artist:'Radiohead',       title:'OK Computer',          price:38, genre:'Rock',       color:'#0d1a2a', accent:'#4a8ab8' },
+      { artist:'Kendrick Lamar',  title:'To Pimp a Butterfly',  price:32, genre:'Hip-Hop',    color:'#1a1a0d', accent:'#a8a83a' },
+    ];
+
+    let cartCount = 0;
+
+    function renderRecords() {
+      const grid = document.getElementById('recordsGrid');
+      grid.innerHTML = RECORDS.map((r, i) => `
+        <div class="record-card">
+          <div class="record-cover" style="background:${r.color};">
+            <div class="cover-img">
+              <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                <rect width="240" height="240" fill="${r.color}"/>
+                <!-- vinyl circle -->
+                <circle cx="120" cy="120" r="100" fill="#111"/>
+                <circle cx="120" cy="120" r="95" fill="#1a1818"/>
+                <circle cx="120" cy="120" r="85" fill="none" stroke="#222" stroke-width="1"/>
+                <circle cx="120" cy="120" r="75" fill="none" stroke="#222" stroke-width="1"/>
+                <circle cx="120" cy="120" r="65" fill="none" stroke="#222" stroke-width="0.8"/>
+                <circle cx="120" cy="120" r="55" fill="none" stroke="#222" stroke-width="0.8"/>
+                <!-- label -->
+                <circle cx="120" cy="120" r="40" fill="${r.accent}" opacity="0.9"/>
+                <circle cx="120" cy="120" r="6"  fill="#111"/>
+                <text x="120" y="115" text-anchor="middle" font-family="sans-serif" font-size="8" fill="rgba(255,255,255,0.8)" letter-spacing="1">${r.genre.toUpperCase()}</text>
+                <text x="120" y="128" text-anchor="middle" font-family="sans-serif" font-size="6" fill="rgba(255,255,255,0.5)">33 1/3 RPM</text>
+              </svg>
+            </div>
+          </div>
+          <div class="record-artist">${r.artist}</div>
+          <div class="record-title">${r.title}</div>
+          <div class="record-foot">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="record-price">$${r.price}</div>
+              <div class="record-genre">${r.genre}</div>
+            </div>
+            <button class="add-btn" onclick="addToCart('${r.title}')">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(title) {
+      cartCount++;
+      document.getElementById('cartBtn').textContent = `Cart (${cartCount})`;
+      showToast(`"${title}" added to cart`);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function handleSubscribe() {
+      const input = document.querySelector('.nl-input');
+      if (input.value.includes('@')) {
+        showToast('You're subscribed! 🎵');
+        input.value = '';
+      } else {
+        showToast('Please enter a valid email');
+      }
+    }
+
+    renderRecords();
+  </script>
+</body>
+</html>
